@@ -25,7 +25,7 @@ def host_range_ping(host_name: str):
 
 
 def main():
-    host = '192.168.0.16'
+    host = input('Введите адрес хоста')
     print(host_range_ping(host))
 
 

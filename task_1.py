@@ -12,7 +12,7 @@ from ipaddress import ip_address
 from subprocess import Popen, PIPE
 
 
-def host_ping(address, packeges=4, timeout='2'):
+def host_ping(address, packeges=4, timeout='0.1'):
 
     checking = Popen(
         ['ping', '-c', str(packeges), '-i', timeout, str(address)],
