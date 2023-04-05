@@ -32,7 +32,7 @@ def _get_presence_status(message: dict) -> bool:
 def _check_presence_message(message: dict) -> bool:
     """
     обработчик запроса клиента с сообщением,
-    возвращает кортеж из имени клиента и сообщения
+    возвращает булево значение
     """
     SERVER_LOGER.debug(f'Входящее сообщение от клиента {message}')
     if ACTION in message and message[ACTION] == MESSAGE and \

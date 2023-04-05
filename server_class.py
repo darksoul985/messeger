@@ -1,46 +1,89 @@
-import argparse
 import socket
+import time
 import logging
-from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, \
-    ERROR, DEFAULT_PORT, MAX_CONNECTIONS, SHORT_ADDRESS_ARGS, ADDRESS_ARGS, \
-    SHORT_PORT_ARGS, PORT_ARGS, TIMEOUT_STEP, MESSAGE, TEXT_MESSAGE, \
-    SENDER, RESPONSE_200, RESPONSE_400, DESTINATION, EXIT
+from common.variables import DEFAULT_PORT, MAX_CONNECTIONS, TIMEOUT_STEP
+from common.argumentes import get_args_server
 from common.utils import get_message, send_message
 from logs.configs.decorations import log
 from select import select
 
 SERVER_LOGER = logging.getLogger('server')
 
+
 class Server:
-    def run(self):
-        # TODO сделать подгрузку настроек из файла DEFAULT_PORT, MAX_CONNECTIONS,TIMEOUT_STEP
-        with socket.create_server(('', DEFAULT_PORT)) as server:
-            try:
-                SERVER_LOGER.info(
-                    f'Сервер запущен по адресу {}\n'
-                    f'Порт для подключения {}'))
+    def __init__(self, address, port):
+        self.sock = None
+        self.address = address
+        self.port = port
 
-                server.listen(MAX_CONNECTIONS)
-                server.settimeout(TIMEOUT_STEP)
-                print('Working...')
-                # список клиентов, очередь сообщений
-                all_clients = []
-                messages = []
+        # словарь со списком клиентов
+        self.clients = []
 
-                names = dict()
+        # список сообщений на отправку
+        self.messages = []
 
-                while True:
-                    try:
-                        clients, address = server.accept()
-                        SERVER_LOGER.info(f'Соединение установлено c {address}')
-                    except OSError:
-                        pass
-                    else:
-                        all_clients.append(clients)
+        # словарь содержащий сопоставленные имена и соответствующие им сокеты
+        self.names = dict()
 
-                    ready_clients = []
-                    write_clients = []
-                    err_list = []
-                    # проверяем наличие ожидающих клиенов
-                    try:
-                        ready_clients, write_clients, err_list = select(all_clients, )
+    def init_socket(self):
+        SERVER_LOGER.info(f'Сервер запущен, порт для подключения: {self.port}, адрес с коорого прнимаются подключения: {self.address}. Если адрес не указан, принимаются соединения с любых адресов')
+        with socket.create_server((self.address, self.port)) as server:
+            # addr, prt = server.getsockname()
+            SERVER_LOGER.info(
+                f'Сервер запущен по адресу {self.address} Порт для подключения {self.port}')
+
+            # слушаем порт и задаем тайм-аут сокета
+            # server.settimeout(TIMEOUT_STEP)
+            self.sock = server
+            self.sock.listen(MAX_CONNECTIONS)
+            print('Working...')
+                
+    def start(self):
+        # инициализация сокета
+        self.init_socket()
+        # основной цикл программы сервера
+        while True:
+            # ждём подключения, если таймаут вышел, ловим исключение
+            # try:
+            socket_cl, address = self.sock.accept()
+            SERVER_LOGER.info(f'Соединение установлено c {address}')
+
+            # except KeyboardInterrupt:
+            #     SERVER_LOGER.critical('Сервер принудительно остановлен')
+
+            # except OSError:
+            #     pass
+
+            # else:
+            #     SERVER_LOGER.info(f'Соединение установлено c {address}')
+
+            timestr = time.ctime(time.time()) + '\n'
+            socket_cl.send(timestr.enconde('ascii'))
+            socket_cl.close()
+
+
+            # read_cl, write_cl, err_lst = ([] for i in range(3))
+
+            # # Проверяем на наличие ждущих клиентов
+            # try:
+            #     if self.clients:
+            #         read_cl, write_cl, err_lst = select(self.clients, self.clients, [], 0)
+
+            # except OSError:
+            #     pass
+
+            # # принимаем сообщение и если ошибка, исключаем клиента из списка клиентов
+            # if read_cl:
+            #     for client_with_message in read_cl:
+            #         try:
+            #             pass
+            #         except:
+            #             pass
+
+        # def read_clients_messages(self, message, client):
+        #     pass
+
+if __name__ == '__main__':
+    listen_address, listen_port = get_args_server()
+    serv = Server(listen_address, listen_port)
+    serv.start()

@@ -56,7 +56,7 @@ def host_range_ping(address: str):
 def main():
     # addresses = ['ya.ru', '8.8.8.8', '192.168.0.1', '192.168.0.255']
     # print(get_ip_address(addresses))
-    addresses = '8.8.8.0'
+    addresses = input('Введите адрес хоста: ')
     print(host_range_ping(addresses))
     
 if __name__ == '__main__':

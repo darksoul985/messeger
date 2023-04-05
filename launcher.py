@@ -11,7 +11,7 @@ PROCESSES = []
 
 def start_app(app_name):
     return subprocess.Popen(
-        f'gnome-terminal -- python {app_name}', shell=True)
+        f'bash -e python {app_name}', shell=True)
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
 
                 for _ in range(int(QUANTITY_CLIENTS)):
 
-                    PROCESSES.append(start_app('client.py -m send'))
+                    PROCESSES.append(start_app('client.py -n send'))
                     time.sleep(0.5)
             else:
                 print('Должно быть числом')
